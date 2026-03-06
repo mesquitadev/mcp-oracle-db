@@ -1,0 +1,36 @@
+{
+  "name": "mcp-oracle-db",
+  "version": "1.0.0",
+  "description": "MCP server for Oracle Database — exploration, queries, writes, and DBA monitoring",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "mcp-oracle-db": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["mcp", "oracle", "database", "model-context-protocol"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "oracledb": "^6.8.0",
+    "zod": "^3.25.36"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": ["dist"],
+  "repository": {
+    "type": "git",
+    "url": ""
+  }
+}
