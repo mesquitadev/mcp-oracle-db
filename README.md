@@ -1,71 +1,68 @@
 # mcp-oracle-db
 
-An MCP (Model Context Protocol) server for Oracle Database. Provides exploration, query execution, write operations, and DBA monitoring tools.
+An [MCP](https://modelcontextprotocol.io) (Model Context Protocol) server for **Oracle Database**.
 
-Works with any MCP-compatible client (Claude Desktop, Claude Code, etc).
+Lets AI assistants explore your database schema, run queries, write data, and monitor sessions — all through natural language.
+
+Works with Claude Desktop, Claude Code, Cursor, Windsurf, and any MCP-compatible client.
 
 ## Features
 
-- Database exploration (schemas, tables, columns, indexes, constraints)
-- SQL query execution with bind variable support
-- DML operations (INSERT, UPDATE, DELETE, MERGE)
-- DDL operations (CREATE, ALTER, DROP, etc)
-- DBA monitoring (explain plans, sessions, locks)
-- Read-only mode by default for safety
-- Oracle Thin mode (no Oracle Client installation required)
-- Connection pooling
-- Supports simple connections, TNS, and Oracle Wallet
+- **Explore** — list schemas, tables, columns, indexes, constraints
+- **Query** — execute SELECT with bind variables
+- **Write** — INSERT, UPDATE, DELETE, MERGE, DDL (opt-in)
+- **Monitor** — explain plans, active sessions, locks
+- **Safe** — read-only by default, write requires explicit opt-in
+- **Zero install** — Oracle Thin mode, no Oracle Client needed
+- **Connection pooling** — efficient resource usage
 
-## Installation
+## Quick Start
 
 ```bash
 npx mcp-oracle-db
 ```
 
 Or install globally:
+
 ```bash
 npm install -g mcp-oracle-db
 ```
 
 ## Configuration
 
-All configuration is done via environment variables:
+Set these environment variables:
 
-| Variable | Description | Required | Default |
+| Variable | Required | Default | Description |
 |---|---|---|---|
-| `ORACLE_USER` | Database username | Yes | - |
-| `ORACLE_PASSWORD` | Database password | Yes | - |
-| `ORACLE_CONNECTION_STRING` | Host:port/service_name or TNS alias | Yes | - |
-| `ORACLE_TNS_ADMIN` | Path to directory containing tnsnames.ora | No | - |
-| `ORACLE_WALLET_LOCATION` | Path to Oracle Wallet directory | No | - |
-| `ORACLE_MODE` | `readonly` or `readwrite` | No | `readonly` |
-| `ORACLE_MAX_ROWS` | Maximum rows returned by queries | No | `1000` |
+| `ORACLE_USER` | Yes | — | Database username |
+| `ORACLE_PASSWORD` | Yes | — | Database password |
+| `ORACLE_CONNECTION_STRING` | Yes | — | `host:port/service` or TNS alias |
+| `ORACLE_MODE` | No | `readonly` | `readonly` or `readwrite` |
+| `ORACLE_MAX_ROWS` | No | `1000` | Max rows per query |
+| `ORACLE_TNS_ADMIN` | No | — | Path to `tnsnames.ora` directory |
+| `ORACLE_WALLET_LOCATION` | No | — | Path to Oracle Wallet (for cloud DBs) |
 
-### Connection Examples
+### Connection string formats
 
-**Simple connection:**
-```
-ORACLE_CONNECTION_STRING=localhost:1521/FREEPDB1
-```
+```bash
+# Standard
+ORACLE_CONNECTION_STRING=myhost:1521/myservice
 
-**TNS connection:**
-```
-ORACLE_CONNECTION_STRING=MYDB_ALIAS
+# TNS alias
+ORACLE_CONNECTION_STRING=MY_TNS_ALIAS
 ORACLE_TNS_ADMIN=/path/to/tns_admin
-```
 
-**Oracle Wallet (Cloud/Autonomous DB):**
-```
+# Oracle Cloud / Autonomous DB (wallet)
 ORACLE_CONNECTION_STRING=myatp_high
 ORACLE_TNS_ADMIN=/path/to/wallet
 ORACLE_WALLET_LOCATION=/path/to/wallet
 ```
 
-## MCP Client Configuration
+## Setup
 
 ### Claude Desktop
 
-Add to your `claude_desktop_config.json`:
+Add to `claude_desktop_config.json`:
 
 ```json
 {
@@ -74,10 +71,9 @@ Add to your `claude_desktop_config.json`:
       "command": "npx",
       "args": ["-y", "mcp-oracle-db"],
       "env": {
-        "ORACLE_USER": "hr",
+        "ORACLE_USER": "your_user",
         "ORACLE_PASSWORD": "your_password",
-        "ORACLE_CONNECTION_STRING": "localhost:1521/FREEPDB1",
-        "ORACLE_MODE": "readonly"
+        "ORACLE_CONNECTION_STRING": "your_host:1521/your_service"
       }
     }
   }
@@ -86,7 +82,7 @@ Add to your `claude_desktop_config.json`:
 
 ### Claude Code
 
-Add to your `.claude/settings.json`:
+Add to `.claude/settings.json`:
 
 ```json
 {
@@ -95,60 +91,63 @@ Add to your `.claude/settings.json`:
       "command": "npx",
       "args": ["-y", "mcp-oracle-db"],
       "env": {
-        "ORACLE_USER": "hr",
+        "ORACLE_USER": "your_user",
         "ORACLE_PASSWORD": "your_password",
-        "ORACLE_CONNECTION_STRING": "localhost:1521/FREEPDB1",
-        "ORACLE_MODE": "readonly"
+        "ORACLE_CONNECTION_STRING": "your_host:1521/your_service"
       }
     }
   }
 }
 ```
 
-## Tools Reference
+### Cursor / Windsurf
+
+Same format as Claude Code — add to your MCP settings with the env vars above.
+
+## Tools
 
 ### Exploration
 
-| Tool | Description | Parameters |
-|---|---|---|
-| `list_schemas` | List all accessible schemas | none |
-| `list_tables` | List tables and views in a schema | `schema` |
-| `describe_table` | Show columns, PKs, FKs, indexes | `schema`, `table` |
+| Tool | Description |
+|---|---|
+| `list_schemas` | List all accessible schemas |
+| `list_tables` | List tables and views in a schema |
+| `describe_table` | Columns, PKs, FKs, indexes of a table |
 
 ### Query
 
-| Tool | Description | Parameters |
-|---|---|---|
-| `query` | Execute SELECT queries | `sql`, `binds?`, `max_rows?` |
+| Tool | Description |
+|---|---|
+| `query` | Run SELECT queries (supports bind variables) |
 
-### Write (requires ORACLE_MODE=readwrite)
+### Write *(requires `ORACLE_MODE=readwrite`)*
 
-| Tool | Description | Parameters |
-|---|---|---|
-| `execute` | Execute DML (INSERT/UPDATE/DELETE/MERGE) | `sql`, `binds?` |
-| `ddl` | Execute DDL (CREATE/ALTER/DROP/etc) | `sql` |
+| Tool | Description |
+|---|---|
+| `execute` | Run DML — INSERT, UPDATE, DELETE, MERGE |
+| `ddl` | Run DDL — CREATE, ALTER, DROP, TRUNCATE |
 
 ### DBA / Monitoring
 
-| Tool | Description | Parameters |
-|---|---|---|
-| `explain_plan` | Generate execution plan | `sql` |
-| `session_info` | Current session information | none |
-| `active_sessions` | List active database sessions | none |
-| `locks` | Show active locks and blockers | none |
+| Tool | Description |
+|---|---|
+| `explain_plan` | Execution plan for a query |
+| `session_info` | Current session details |
+| `active_sessions` | All active database sessions |
+| `locks` | Active locks and blockers |
 
 ## Security
 
-- **Read-only by default**: Write operations (`execute`, `ddl`) are blocked unless `ORACLE_MODE=readwrite`
-- **SQL validation**: The `query` tool only accepts SELECT/WITH statements
-- **Bind variables**: All tools support bind variables to prevent SQL injection
-- **Connection pooling**: Efficient resource usage with configurable pool size
+- **Read-only by default** — writes blocked unless `ORACLE_MODE=readwrite`
+- **SQL validation** — `query` only accepts SELECT/WITH
+- **Bind variables** — prevents SQL injection
+- **No credentials in code** — everything via environment variables
 
 ## Requirements
 
 - Node.js >= 18
-- Oracle Database (any supported version)
-- No Oracle Client installation needed (uses Thin mode)
+- Oracle Database (any version)
+- No Oracle Client installation needed
 
 ## License
 

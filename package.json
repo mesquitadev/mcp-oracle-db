@@ -1,7 +1,7 @@
 {
   "name": "mcp-oracle-db",
   "version": "1.0.0",
-  "description": "MCP server for Oracle Database — exploration, queries, writes, and DBA monitoring",
+  "description": "MCP server for Oracle Database — explore schemas, run queries, write data, and monitor sessions. Works with Claude Desktop, Claude Code, and any MCP client.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -17,9 +17,19 @@
     "mcp",
     "oracle",
     "database",
-    "model-context-protocol"
+    "model-context-protocol",
+    "claude",
+    "ai",
+    "sql",
+    "dba",
+    "oracle-db",
+    "llm",
+    "tool"
   ],
-  "author": "",
+  "author": {
+    "name": "Paulo Mesquita",
+    "url": "https://github.com/mesquitadev"
+  },
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
@@ -35,10 +45,16 @@
     "node": ">=18.0.0"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/mesquitadev/mcp-oracle-db"
+  },
+  "homepage": "https://github.com/mesquitadev/mcp-oracle-db#readme",
+  "bugs": {
+    "url": "https://github.com/mesquitadev/mcp-oracle-db/issues"
   }
 }
