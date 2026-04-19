@@ -8,25 +8,34 @@ import { registerExplorationTools } from "./tools/exploration.js";
 import { registerQueryTools } from "./tools/query.js";
 import { registerWriteTools } from "./tools/write.js";
 import { registerDBATools } from "./tools/dba.js";
+import { registerUnconfiguredTool } from "./tools/unconfigured.js";
 
 async function main() {
-  const config = loadConfig();
+  const result = loadConfig();
 
   const server = new McpServer({
     name: "mcp-oracle-db",
     version: "1.0.0",
+    description: result.ok
+      ? `Oracle MCP server connected (mode: ${result.config.mode}). Use the available tools to explore schemas, run queries, and manage the database.`
+      : "Oracle MCP server - NOT CONFIGURED. Use the oracle_setup tool to see setup instructions.",
   });
 
-  registerExplorationTools(server);
-  registerQueryTools(server, config);
-  registerWriteTools(server, config);
-  registerDBATools(server);
+  if (!result.ok) {
+    console.error(`mcp-oracle-db: missing environment variables: ${result.missingVars.join(", ")}`);
+    registerUnconfiguredTool(server, result.message);
+  } else {
+    registerExplorationTools(server);
+    registerQueryTools(server, result.config);
+    registerWriteTools(server, result.config);
+    registerDBATools(server);
 
-  await initPool(config);
+    await initPool(result.config);
+    console.error("MCP Oracle DB server running on stdio");
+  }
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("MCP Oracle DB server running on stdio");
 
   process.on("SIGINT", async () => {
     await closePool();
